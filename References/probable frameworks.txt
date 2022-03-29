@@ -1,0 +1,3 @@
+https://github.com/cgearhart/Chessnut
+https://github.com/kervinck/chessmoves
+https://github.com/LetterC67/Chess-Game-in-Python
