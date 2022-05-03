@@ -1,6 +1,6 @@
-Use piece's all power:
-	Travel longers = better
-	Bishop travelling 8 diagnols is more aesthetic than queen
+	Use piece's all power:
+		Travel longers = better
+		Bishop travelling 8 diagnols is more aesthetic than queen
 
 Sacrifice:
 	Final material < Initial material

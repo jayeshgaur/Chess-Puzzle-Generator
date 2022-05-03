@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI based chess puzzle generation</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+            crossorigin="anonymous">
+    </script>
+</head>
+<body>
+    <div>
+        <div class="container">
+            <div class="form-group">
+                <form onsubmit="return false;" action="#" class="form-horizontal">
+                    <div class="form-group">
+                        <input id="fen" type="text" placeholder="Enter FEN">
+                        <button id="submit-btn" class="btn btn-user-account-submit float-right">Submit</button>
+                        <div id="results">Test</div>
+                    </div>
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        $("#submit-btn").click(function (){
+            const res = $("#results");
+            const fen = $("#fen").val();
+
+            console.log(fen);
+            if (fen === "") {
+                res.html("Invalid FEN");
+                return;
+            }
+            res.html("Retrieving puzzles, please wait");
+
+            $.ajax({
+                url: "/get-fens-" + fen,
+                context: document.body
+            }).done(function (data){
+                res.html(data);
+            });
+        })
+    </script>
+</body>
+</html>
