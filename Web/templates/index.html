@@ -28,9 +28,10 @@
     <script>
         $("#submit-btn").click(function (){
             const res = $("#results");
-            const fen = $("#fen").val();
+            const fen_input = $("#fen").val();
 
-            console.log(fen);
+            const fen = fen_input.replaceAll("/", "^");
+
             if (fen === "") {
                 res.html("Invalid FEN");
                 return;
@@ -39,9 +40,11 @@
 
             $.ajax({
                 url: "/get-fens-" + fen,
-                context: document.body
-            }).done(function (data){
-                res.html(data);
+                type: "GET",
+                contentType: 'application/json',
+                success: function (data) {
+                    res.html(data);
+                }
             });
         })
     </script>

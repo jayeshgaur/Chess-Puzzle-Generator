@@ -251,7 +251,7 @@ class Heuristics:
 
     def material_disadvantage(self, fen_position: str, *args) -> (bool, float):
         white, black = self.total_material(fen_position=fen_position)
-        return white * Heuristics.ADVANTAGE_THRESHOLD > black, (white - black) / self.material_disadvantage_constant
+        return white * Heuristics.ADVANTAGE_THRESHOLD > black, abs((white - black) / self.material_disadvantage_constant)
 
     def sacrifice(self, fen_position_initial: str, fen_position_end: str, num_moves: int) -> (bool, float):
         if not fen_position_end:

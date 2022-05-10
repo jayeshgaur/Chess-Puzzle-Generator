@@ -1,5 +1,6 @@
 import time
 import math
+import random
 
 import chess
 from stockfish import Stockfish
@@ -96,6 +97,12 @@ class GameState:
             "uncapture": [],
         }
 
+        results = {
+            "legal": [],
+            "pawn": [],
+            "uncapture": [],
+        }
+
         for i in range(1, max_depth):
             count = 0
             temp_queue = []
@@ -157,16 +164,12 @@ class GameState:
                     if i < 3:
                         temp_filtered = [state for state in temp_filtered if state[3][1] > 0.1]
                     if len(temp_filtered) > 5 and trim:
-                        print("Trimming to top 5 out of ", len(temp_filtered))
                         temp_filtered.sort(key=lambda x: x[3][1])
                         temp_filtered = temp_filtered[:5]
                     total_states += len(temp_filtered)
-                    print("Selected States: ", len(temp_filtered), "; Total States: ", total_states)
                     if temp_filtered and i > 1 and i % 2 == 1:
                         for row in temp_filtered:
-                            print("Depth ", i)
-                            print(row)
-                            display(chess.Board(row[1]))
+                            results[move_type].append((i, row))
                     temp_filtered = [move[1] for move in temp_filtered]
                     temp_queue.extend(temp_filtered)
                     filtered[move_type] = temp_filtered
@@ -174,3 +177,15 @@ class GameState:
             print(f"Total good puzzles at depth: {i} are {count}")
             queue = temp_queue
         print(time.time() - _start)
+
+        puzzles = []
+        for move_type in results:
+            temp = random.choices(results[move_type], k=min(len(results[move_type]), 2))
+            puzzles.extend([puzzle[1][1] for puzzle in temp if puzzle[0] > 2])
+        return puzzles
+
+
+if __name__ == '__main__':
+    generator = GameState("8/p2R4/1p1p4/3Pp2k/4P2b/1P2BpK1/P4P1P/6n1 w - - 2 36")
+    puzzles = generator.get_puzzles()
+    print(puzzles)

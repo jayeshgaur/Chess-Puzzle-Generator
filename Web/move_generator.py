@@ -1,8 +1,7 @@
 
 import chess
-import numpy as np
-from chess import SQUARES, BB_RANKS, BB_SQUARES, BB_BACKRANKS
 from numpy import ndarray
+import numpy as np
 
 stockfish_path = "stockfish_14.1_win_x64_avx2/stockfish_14.1_win_x64_avx2.exe"
 
