@@ -129,8 +129,12 @@ class GameState:
                         if move in top_moves[0]["Move"]:
                             count += 1
                             val = self.heur.get_all_heuristics(fen)
+
                             if not top_moves[0]["Centipawn"]:
+                                if not top_moves[0]["Mate"]:
+                                    continue
                                 top_moves[0]["Centipawn"] = math.inf * top_moves[0]["Mate"]
+
                             filtered[move_type].append((move, fen, top_moves[0]["Centipawn"], val))
                             centis[move_type].append(top_moves[0]["Centipawn"])
                             heurs[move_type].append(val[1])
@@ -182,10 +186,43 @@ class GameState:
         for move_type in results:
             temp = random.choices(results[move_type], k=min(len(results[move_type]), 2))
             puzzles.extend([puzzle[1][1] for puzzle in temp if puzzle[0] > 2])
-        return puzzles
+        return results
 
 
 if __name__ == '__main__':
-    generator = GameState("8/p2R4/1p1p4/3Pp2k/4P2b/1P2BpK1/P4P1P/6n1 w - - 2 36")
+    generator = GameState("6R1/1ppk1Np1/p6p/2b5/8/PnP5/1P3PPP/6K1 b - - 0 29")
     puzzles = generator.get_puzzles()
     print(puzzles)
+    legal = puzzles["legal"]
+    uncapture = puzzles["uncapture"]
+
+    print(len(legal))
+    print(len(uncapture))
+
+    max = 0
+    top_puzzles = []
+
+    for i in range(0, 2):
+        max = 0
+        if len(legal) > 0:
+            for j in range(len(legal)):
+                if max < legal[j][1][3][1]:
+                    top_fen = legal[j][1][1]
+                    max = legal[j][1][3][1]
+                    index = j
+            top_puzzles.append(top_fen)
+            legal.remove(legal[index])
+    print(len(top_puzzles))
+
+    for i in range(0, 2):
+        max = 0
+        if len(uncapture) > 0:
+            for j in range(len(uncapture)):
+                if max < uncapture[j][1][3][1]:
+                    top_fen = uncapture[j][1][1]
+                    max = uncapture[j][1][3][1]
+                    index = j
+            top_puzzles.append(top_fen)
+            uncapture.remove(uncapture[index])
+
+    print(top_puzzles)

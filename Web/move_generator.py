@@ -26,6 +26,8 @@ class LegalMoves(chess.LegalMoveGenerator):
 def uci(move):
     move = move.replace("+", "")
     move = move.replace("#", "")
+    if "=" in move:
+       move = move[:move.index("=")]
     return move[-5:].replace("-", "")
 
 
@@ -50,7 +52,10 @@ class MoveGenerator:
     """
 
     def __init__(self) -> None:
+        # 64 8x8 square matrix
         self.mapper = np.linspace(1, 64, num=64, dtype=int).reshape((8, 8))
+
+        # map fen to 8x8 matrix chess board
         self.map_fen = {alpha: num for alpha, num in zip("abcdefgh", range(8))}
 
     @staticmethod
@@ -83,13 +88,14 @@ class MoveGenerator:
         legal = LegalMoves(board).to_array()
         return [uci(x) for x in legal if not x.islower() and "x" not in x]
 
-    def get_capture_moves(self, fen_pos: str) -> list:
+    def get_capture_moves(self, fen_pos: list) -> list:
         # TODO: Replace with all moves
-        moves = self.get_legal_moves(fen_pos)
-        moves = [move for move in moves if "x" in move]
+        board = ChessBoard(fen_pos)
+        legal = LegalMoves(board).to_array()
+        moves = [uci(move) for move in legal if "x" in move]
         return moves
 
-    def get_pawn_moves(self, fen_pos: str) -> dict:
+    def get_pawn_moves(self, fen_pos: str) -> None:
         """
             Returns a tuple of (legal_moves, uncapture_moves) for all pawns of player in the given board
             legal_moves: All non-capture moves from board (NOTE: does not validate for discover check)
@@ -141,11 +147,11 @@ class MoveGenerator:
         ]
 
         moves_to_remove = []
-        # Illegal pawn uncapture (when space is not empty)
+        # Illegal pawn uncaptures (when space is not empty)
         for move in uncapture_moves:
             row, column = np.where(self.mapper == move[1])
             row, column = row[0], column[0]
-            if fen_pos[row][column] != '-':
+            if (fen_pos[row][column] != '-'):
                 moves_to_remove.append(move)
 
         uncapture_moves = [i for i in uncapture_moves if i not in moves_to_remove]
@@ -162,6 +168,26 @@ class MoveGenerator:
             "uncapture": uncapture_pawn_moves
         }
 
+    # Get chess board position color - white/black
+    def get_position_color(self, mapper_number: int) -> str:
+        color_row = int(mapper_number / 8)
+        if color_row % 2 == 0:
+            if mapper_number % 2 == 0:
+                b_color = 0
+            elif mapper_number % 2 != 0:
+                b_color = 1
+
+        elif color_row % 2 != 0:
+            if mapper_number % 2 == 0:
+                b_color = 1
+            elif mapper_number % 2 != 0:
+                b_color = 0
+
+        if b_color == 0:
+            return "white"
+        else:
+            return "black"
+
     def get_uncapture_moves(self, fen_pos: str, moves: list) -> list:
         """ Return a list of FEN states that can be possible "uncapture" moves """
 
@@ -173,7 +199,7 @@ class MoveGenerator:
         pieces = ['P'] * 8 + ['R'] + ['N'] + ['B'] + ['Q'] + ['K'] + ['B'] + ['N'] + ['R']
 
         # Fetch pieces already on the board
-        if opponent == 'b':
+        if (opponent == 'b'):
             pieces = [piece.lower() for piece in pieces]
             pieces_on_board = [character for character in fen_pos.split()[0] if character.islower()]
         else:
@@ -228,7 +254,29 @@ class MoveGenerator:
                 new_fen = "/".join(rows_list)
                 fen_arr[0] = new_fen
                 new_fen = " ".join(fen_arr)
-                previous_fens.append((move, new_fen))
+
+                # Check if bishop is of different color
+                if piece == 'b' or piece == 'B':
+                    if piece in fen_pos:
+
+                        existing_X, existing_Y = np.where(MoveGenerator.board_numpy(fen_pos) == piece)
+                        existing_X, existing_Y = existing_X[0], existing_Y[0]
+                        existing_piece_position = self.mapper[existing_X][existing_Y]
+
+                        y = ord(move[0]) - 97
+                        x = 8 - int(move[1])
+                        mapper_number = self.mapper[x][y]
+
+                        # Get color of position for existing bishop
+                        existing_color = self.get_position_color(existing_piece_position)
+
+                        # Get color of position for uncaptured bishop
+                        color = self.get_position_color(mapper_number)
+                        if existing_color != color:
+                            previous_fens.append((move, new_fen))
+
+                else:
+                    previous_fens.append((move, new_fen))
 
         return previous_fens
 
@@ -236,6 +284,7 @@ class MoveGenerator:
         fen_pos = fen_pos.split()
         fen_pos[1] = "w" if fen_pos[1] == "b" else "b"
         fen_pos = " ".join(fen_pos)
+        player = fen_pos.split()[1]
         board = ChessBoard(fen_pos)
 
         legal = self.get_legal_moves(fen_pos)
@@ -276,3 +325,5 @@ class MoveGenerator:
                     if move in legal:
                         validated_states[move_type].append((move, fens))
         return validated_states
+
+
