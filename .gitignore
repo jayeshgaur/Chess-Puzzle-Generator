@@ -1,6 +1,7 @@
 # Custom files
 GitIgnore/
 Literature/
+stockfish_14.1_win_x64_avx2/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
