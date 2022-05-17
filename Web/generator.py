@@ -190,9 +190,11 @@ class GameState:
 
 
 if __name__ == '__main__':
-    generator = GameState("6R1/1ppk1Np1/p6p/2b5/8/PnP5/1P3PPP/6K1 b - - 0 29")
+    import time
+
+    _start = time.time()
+    generator = GameState("2rQ3r/1p1b1B2/p2k4/3Rn3/PP2p1pp/8/4K1P1/2R5 b - - 1 35")
     puzzles = generator.get_puzzles()
-    print(puzzles)
     legal = puzzles["legal"]
     uncapture = puzzles["uncapture"]
 
@@ -205,24 +207,33 @@ if __name__ == '__main__':
     for i in range(0, 2):
         max = 0
         if len(legal) > 0:
+            top_fen = None
+            index = None
             for j in range(len(legal)):
                 if max < legal[j][1][3][1]:
                     top_fen = legal[j][1][1]
                     max = legal[j][1][3][1]
                     index = j
-            top_puzzles.append(top_fen)
-            legal.remove(legal[index])
+            if top_fen:
+                top_puzzles.append(top_fen)
+                legal.remove(legal[index])
     print(len(top_puzzles))
 
     for i in range(0, 2):
         max = 0
+
+        top_fen = None
+        index = None
         if len(uncapture) > 0:
             for j in range(len(uncapture)):
                 if max < uncapture[j][1][3][1]:
                     top_fen = uncapture[j][1][1]
                     max = uncapture[j][1][3][1]
                     index = j
-            top_puzzles.append(top_fen)
-            uncapture.remove(uncapture[index])
+            if top_fen:
+                top_puzzles.append(top_fen)
+                uncapture.remove(uncapture[index])
 
     print(top_puzzles)
+
+    print(time.time() - _start)
